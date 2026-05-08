@@ -161,3 +161,5 @@ E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\obj\Debug\net10.0\EmployeeDetai
 E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\obj\Debug\net10.0\ref\EmployeeDetails.dll
 E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\bin\Debug\net10.0\BCrypt.Net-Next.dll
 E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\obj\Debug\net10.0\EmployeeDetails.sourcelink.json
+E:\ANGULAR_LEARN\EmployeeDetails\EmployeeDetails\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
