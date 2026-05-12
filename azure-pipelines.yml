@@ -30,6 +30,7 @@ stages:
       runOnce:
         deploy:
           steps:
+            - checkout: self  
 
           - task: UseDotNet@2
             inputs:
@@ -77,6 +78,7 @@ stages:
       runOnce:
         deploy:
           steps:
+            - checkout: self  
 
           - task: UseDotNet@2
             inputs:
@@ -124,6 +126,7 @@ stages:
       runOnce:
         deploy:
           steps:
+            - checkout: self  
 
           - task: UseDotNet@2
             inputs:
