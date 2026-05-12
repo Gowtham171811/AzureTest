@@ -24,7 +24,7 @@ stages:
 
   jobs:
   - deployment: DeployDev
-    environment: Dev
+    environment: dev
 
     strategy:
       runOnce:
@@ -71,7 +71,7 @@ stages:
 
   jobs:
   - deployment: DeployTest
-    environment: Test
+    environment: test
 
     strategy:
       runOnce:
@@ -118,7 +118,7 @@ stages:
 
   jobs:
   - deployment: DeployProd
-    environment: Prod
+    environment: prod
 
     strategy:
       runOnce:
