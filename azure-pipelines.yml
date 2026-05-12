@@ -1,0 +1,156 @@
+trigger:
+  branches:
+    include:
+      - dev
+      - test
+      - prod
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+- name: buildConfiguration
+  value: 'Release'
+
+stages:
+
+# ================= DEV =================
+
+- stage: Dev
+  condition: eq(variables['Build.SourceBranchName'], 'dev')
+
+  variables:
+  - group: dev-vars
+
+  jobs:
+  - deployment: DeployDev
+    environment: Dev
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+
+# ================= TEST =================
+
+- stage: Test
+  condition: eq(variables['Build.SourceBranchName'], 'test')
+
+  variables:
+  - group: test-vars
+
+  jobs:
+  - deployment: DeployTest
+    environment: Test
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+
+# ================= PROD =================
+
+- stage: Prod
+  condition: eq(variables['Build.SourceBranchName'], 'prod')
+
+  variables:
+  - group: prod-vars
+
+  jobs:
+  - deployment: DeployProd
+    environment: Prod
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
