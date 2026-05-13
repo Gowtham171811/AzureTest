@@ -1,0 +1,183 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - prod
+
+env:
+  BUILD_CONFIGURATION: Release
+  DOTNET_VERSION: '10.x'
+
+# =========================
+# DEV DEPLOYMENT
+# =========================
+jobs:
+
+  deploy-dev:
+    name: Deploy to Dev
+
+    if: github.ref == 'refs/heads/dev'
+
+    runs-on: ubuntu-latest
+
+    environment: dev
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+
+      # Checkout source code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Install .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # Restore packages
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      # Build application
+      - name: Build Application
+        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+      # Publish application
+      - name: Publish Application
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --output ./publish --no-build
+
+      # Zip publish folder
+      - name: Create ZIP Package
+        run: |
+          cd publish
+          zip -r ../app.zip .
+
+      # Azure Login using OIDC
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Deploy to Azure App Service
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_NAME }}
+          package: ./app.zip
+
+# =========================
+# TEST DEPLOYMENT
+# =========================
+
+  deploy-test:
+    name: Deploy to Test
+
+    if: github.ref == 'refs/heads/test'
+
+    runs-on: ubuntu-latest
+
+    environment: test
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Application
+        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+      - name: Publish Application
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --output ./publish --no-build
+
+      - name: Create ZIP Package
+        run: |
+          cd publish
+          zip -r ../app.zip .
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_NAME }}
+          package: ./app.zip
+
+# =========================
+# PROD DEPLOYMENT
+# =========================
+
+  deploy-prod:
+    name: Deploy to Prod
+
+    if: github.ref == 'refs/heads/prod'
+
+    runs-on: ubuntu-latest
+
+    environment: prod
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Application
+        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+      - name: Publish Application
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --output ./publish --no-build
+
+      - name: Create ZIP Package
+        run: |
+          cd publish
+          zip -r ../app.zip .
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_NAME }}
+          package: ./app.zip
