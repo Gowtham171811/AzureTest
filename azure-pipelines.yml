@@ -6,7 +6,7 @@ trigger:
       - prod
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'  # Changed to Linux agent
 
 variables:
 - name: buildConfiguration
@@ -58,9 +58,10 @@ stages:
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'Azure-Connection'
-              appType: 'webApp'
+              appType: 'webAppLinux'        # Changed from 'webApp'
               appName: '$(appName)'
               package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux
 
 # ================= TEST =================
 
@@ -106,9 +107,10 @@ stages:
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'Azure-Connection'
-              appType: 'webApp'
+              appType: 'webAppLinux'        # Changed from 'webApp'
               appName: '$(appName)'
               package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux
 
 # ================= PROD =================
 
@@ -154,6 +156,7 @@ stages:
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'Azure-Connection'
-              appType: 'webApp'
+              appType: 'webAppLinux'        # Changed from 'webApp'
               appName: '$(appName)'
               package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux
