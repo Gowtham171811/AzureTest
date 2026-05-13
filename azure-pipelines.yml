@@ -1,0 +1,162 @@
+trigger:
+  branches:
+    include:
+      - dev
+      - test
+      - prod
+
+pool:
+  vmImage: 'ubuntu-latest'  # Changed to Linux agent
+
+variables:
+- name: buildConfiguration
+  value: 'Release'
+
+stages:
+
+# ================= DEV =================
+
+- stage: Dev
+  condition: eq(variables['Build.SourceBranchName'], 'dev')
+
+  variables:
+  - group: dev-vars
+
+  jobs:
+  - deployment: DeployDev
+    environment: dev
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self  
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webAppLinux'        # Changed from 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux
+
+# ================= TEST =================
+
+- stage: Test
+  condition: eq(variables['Build.SourceBranchName'], 'test')
+
+  variables:
+  - group: test-vars
+
+  jobs:
+  - deployment: DeployTest
+    environment: test
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self  
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webAppLinux'        # Changed from 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux
+
+# ================= PROD =================
+
+- stage: Prod
+  condition: eq(variables['Build.SourceBranchName'], 'prod')
+
+  variables:
+  - group: prod-vars
+
+  jobs:
+  - deployment: DeployProd
+    environment: prod
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self  
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-Connection'
+              appType: 'webAppLinux'        # Changed from 'webApp'
+              appName: '$(appName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              runtimeStack: 'DOTNETCORE|10.0'  # Added for Linux

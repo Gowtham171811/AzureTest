@@ -25,6 +25,13 @@ namespace EmployeeDetails.Controllers
             return Ok(employees);
         }
 
+        [HttpGet("GetTheData")]
+        public async Task<IActionResult> GetTheData()
+        {
+            var employees = await _context.Employees.ToListAsync();
+            return Ok(employees);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
